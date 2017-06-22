@@ -1,0 +1,2 @@
+DATABASE Utils : database url is:jdbc:sqlite:./Results//AndroidMethodDatabase.db
+DATABASE Utils : driver name is : SQLiteJDBC
