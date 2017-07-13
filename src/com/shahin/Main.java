@@ -1,8 +1,6 @@
 package com.shahin;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FilenameFilter;
+import java.io.*;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +41,16 @@ public class Main {
 		DataBaseUtils db = new DataBaseUtils(OUTPUT_PATH, logger);
 		db.checkDB();
 
+        PrintWriter constWriter = null;
+        try
+        {
+            constWriter = new PrintWriter(OUTPUT_PATH + File.separator + "android_or_comAndroid_constances.txt", "UTF-8");
+        }
+        catch (IOException e) {
+            return;
+        }
+
+
 
         /*
         //File f = new File("/Users/emadpres/Library/Android/sdk/docs/reference/java/util/concurrent/TimeUnit.html");
@@ -58,7 +66,7 @@ public class Main {
 			    String packageName  = htmlFilesPath.substring(DOCS_PATH.length()+1, htmlFilesPath.length()-".html".length());
 			    packageName = packageName.replace('/','.');
 
-				HtmlFileParser parser = new HtmlFileParser(logger, packageName, f, db);
+				HtmlFileParser parser = new HtmlFileParser(logger, packageName, f, db, constWriter);
 				parser.getData();
 			}
 			logger.info(i +" / " + sources.size());
@@ -66,7 +74,9 @@ public class Main {
 		}
 
 
-		
+
+
+        constWriter.close();
 		logger.close();
 	}
 	

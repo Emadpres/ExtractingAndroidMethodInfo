@@ -1,8 +1,8 @@
 package com.shahin;
 
-import java.awt.RadialGradientPaint;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +18,7 @@ public class HtmlFileParser {
 
 	private Document doc;
 	private Logger log;
+	private PrintWriter constWriter;
 	private int ver = 24;
 	private List<String[]> longDesc;
 	private DataBaseUtils db;
@@ -26,9 +27,10 @@ public class HtmlFileParser {
 	private int classType;
 	private final String TAG = "HTML FILE PAESER";
 
-	public HtmlFileParser(Logger log, String packageName, File htmlFile, DataBaseUtils db) {
+	public HtmlFileParser(Logger log, String packageName, File htmlFile, DataBaseUtils db, PrintWriter constWriter) {
 		this.db = db;
 		this.log = log;
+		this.constWriter = constWriter;
 		this.packageName = packageName;
 		longDesc = new ArrayList<>();
 		try {
@@ -80,32 +82,50 @@ public class HtmlFileParser {
 
 		Element cons = doc.getElementById("pubctors");
 		if (cons != null) {
-			Elements p = cons.select("tbody >tr.api");
-			if (p != null)
-				showAllConstructors(p);
+			Elements pList = cons.select("tbody >tr.api");
+			if (pList != null)
+				addAllConstructorsToDB(pList);
 		}
 
 		Element publicMethods = doc.getElementById("pubmethods");
 		if (publicMethods != null) {
-			Elements p = publicMethods.select("tbody >tr.api");
-			if (p != null)
-				showAllMethods(p, 0);
+			Elements pList = publicMethods.select("tbody >tr.api");
+			if (pList != null)
+				addAllMethodsToDB(pList, 0);
 		}
 
 		Element protectMethods = doc.getElementById("promethods");
 		if (protectMethods != null) {
-			Elements protects = protectMethods.select("tbody >tr.api");
-			if(protects != null)
-				showAllMethods(protects, 1);
+			Elements pList = protectMethods.select("tbody >tr.api");
+			if(pList != null)
+				addAllMethodsToDB(pList, 1);
 		}
 
+		if (this.packageName.startsWith("android") || this.packageName.startsWith("com.android"))
+        {
+            Element consts = doc.getElementById("constants");
+            if (consts != null)
+            {
+                Elements pList = consts.select("tbody >tr.api");
+                if (pList != null)
+                    writeAllConstancesToFile(pList);
+            }
+        }
+
+
 	}
 
-	private void showConstructor(Elements childs) {
-
+	private void writeAllConstancesToFile(Elements childs)
+	{
+		for (Element e : childs)
+		{
+			Element signatureElement = e.select("td").get(1).select("code").first();
+			String s = signatureElement.text();
+			constWriter.print(s+'\n');
+		}
 	}
 
-	private void showAllConstructors(Elements childs)
+	private void addAllConstructorsToDB(Elements childs)
 	{
 		String methodRet = "void", methodName = className;
 		for (Element e : childs)
@@ -144,7 +164,7 @@ public class HtmlFileParser {
 		}
 	}
 
-	private void showAllMethods(Elements childs, int methodType) {
+	private void addAllMethodsToDB(Elements childs, int methodType) {
 
 		for (Element e : childs) {
 			String methodRet = "", methodName = "", desc = "", args = "", longText = "";
